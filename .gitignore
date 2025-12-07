@@ -1,0 +1,31 @@
+# Environment (contains secrets)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Videos (too large for git)
+videos/
+*.mp4
+
+# Logs
+*.log
+crash.log
+
+# yt-dlp archive
+download_archive.txt
+
+# Overlay temp file
+overlay.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
