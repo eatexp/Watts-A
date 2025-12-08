@@ -42,27 +42,7 @@ class StreamManager:
         if not rtmp_urls:
             raise ValueError("No RTMP destinations configured")
 
-        # Build drawtext filter for overlay with professional styling
-        # - fontfile: Explicit path to avoid "font not found" on fresh servers
-        # - box=1 with boxcolor=black@0.6 creates semi-transparent backdrop
-        # - boxborderw=20 adds padding around text
-        # - Centered positioning for TV-style appearance
-        font_file = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        drawtext_filter = (
-            f"drawtext=textfile='{Config.OVERLAY_FILE}':"
-            f"fontfile='{font_file}':"
-            f"reload=1:"
-            f"fontsize=32:"
-            f"fontcolor=white:"
-            f"box=1:"
-            f"boxcolor=black@0.6:"
-            f"boxborderw=20:"
-            f"borderw=2:"
-            f"bordercolor=black:"
-            f"x=(w-text_w)/2:"
-            f"y=(h-text_h)/2"
-        )
-
+        # OVERLAY DISABLED: imageio-ffmpeg lacks drawtext filter
         # Build tee output for multiple destinations
         tee_outputs = "|".join(f"[f=flv]{url}" for url in rtmp_urls)
 
@@ -70,7 +50,7 @@ class StreamManager:
             "ffmpeg",
             "-re",  # Read input at native frame rate
             "-i", str(video_path),
-            "-vf", drawtext_filter,
+            # "-vf", drawtext_filter,  # DISABLED: No drawtext support
             "-c:v", "libx264",
             "-preset", "veryfast",
             "-b:v", Config.STREAM_BITRATE,
