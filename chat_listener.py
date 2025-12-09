@@ -8,7 +8,6 @@ import asyncio
 import json
 import logging
 import re
-import threading
 import time
 from typing import Callable
 
@@ -34,10 +33,11 @@ class TwitchBot(commands.Bot):
         Args:
             vote_callback: Function to call when a vote is received.
         """
+        channels = [Config.TWITCH_CHANNEL] if Config.TWITCH_CHANNEL else []
         super().__init__(
             token=Config.TWITCH_ACCESS_TOKEN,
             prefix="!",
-            initial_channels=[Config.TWITCH_CHANNEL] if Config.TWITCH_CHANNEL else []
+            initial_channels=channels
         )
         self._vote_callback = vote_callback
         self._vote_pattern = re.compile(r"^[AaBbCcDd]$")
@@ -109,7 +109,10 @@ class KickListener:
             url = f"https://kick.com/api/v2/channels/{channel_name}"
             headers = {
                 "Accept": "application/json",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36"
+                )
             }
             response = requests.get(url, headers=headers, timeout=10)
 
@@ -118,7 +121,10 @@ class KickListener:
                 chatroom = data.get("chatroom", {})
                 return chatroom.get("id")
             else:
-                logger.error(f"Failed to fetch Kick channel info: HTTP {response.status_code}")
+                logger.error(
+                    f"Failed to fetch Kick channel info: "
+                    f"HTTP {response.status_code}"
+                )
         except Exception as e:
             logger.error(f"Error fetching Kick chatroom ID: {e}")
 
@@ -160,7 +166,9 @@ class KickListener:
         if self._chatroom_id and self._pusher:
             channel_name = f"chatrooms.{self._chatroom_id}.v2"
             channel = self._pusher.subscribe(channel_name)
-            channel.bind("App\\Events\\ChatMessageEvent", self._on_chat_message)
+            channel.bind(
+                "App\\Events\\ChatMessageEvent", self._on_chat_message
+            )
             logger.info(f"Subscribed to Kick channel: {channel_name}")
 
     def _on_disconnect(self, data):
@@ -198,14 +206,22 @@ class KickListener:
         )
 
         # Bind connection handlers
-        self._pusher.connection.bind("pusher:connection_established", self._on_connect)
-        self._pusher.connection.bind("pusher:connection_failed", self._on_error)
-        self._pusher.connection.bind("pusher:disconnected", self._on_disconnect)
+        self._pusher.connection.bind(
+            "pusher:connection_established", self._on_connect
+        )
+        self._pusher.connection.bind(
+            "pusher:connection_failed", self._on_error
+        )
+        self._pusher.connection.bind(
+            "pusher:disconnected", self._on_disconnect
+        )
 
         # Connect (runs in background thread)
         self._pusher.connect()
 
-        logger.info(f"Kick listener started for channel: {Config.KICK_CHANNEL}")
+        logger.info(
+            f"Kick listener started for channel: {Config.KICK_CHANNEL}"
+        )
 
         # Keep coroutine alive while running
         while self._running:
@@ -293,7 +309,8 @@ class ChatManager:
         Set the callback for when votes are received.
 
         Args:
-            callback: Function to call with (platform, username, vote, timestamp).
+            callback: Function to call with
+                      (platform, username, vote, timestamp).
         """
         self._vote_callback = callback
 

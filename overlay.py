@@ -60,7 +60,8 @@ class OverlayManager:
 
         Args:
             options: List of (letter, video_path) tuples.
-                     e.g., [("A", Path("video1.mp4")), ("B", Path("video2.mp4"))]
+                     e.g., [("A", Path("video1.mp4")),
+                     ("B", Path("video2.mp4"))]
         """
         lines = ["VOTE NOW! Type A, B, C, or D in chat!"]
         for letter, video_path in options:

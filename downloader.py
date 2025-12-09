@@ -101,7 +101,10 @@ def download_from_channel(channel_url: str) -> int:
     Path(videos_folder).mkdir(parents=True, exist_ok=True)
 
     ydl_opts = {
-        'format': 'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best',
+        'format': (
+            'bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/'
+            'best[height<=1080][ext=mp4]/best'
+        ),
         'merge_output_format': 'mp4',
         'outtmpl': os.path.join(videos_folder, '%(title)s.%(ext)s'),
         'download_archive': archive_file,
@@ -119,6 +122,8 @@ def download_from_channel(channel_url: str) -> int:
         # Sanitize filenames
         'restrictfilenames': True,
         'windowsfilenames': True,
+        # Bypass YouTube bot detection
+        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
     }
 
     downloaded = 0
@@ -208,7 +213,10 @@ def harvest_cycle():
         time.sleep(5)
 
     video_count = len(get_video_files())
-    logger.info(f"Harvest complete. Downloaded {total_downloaded} new videos. Library: {video_count}/{Config.MAX_VIDEOS}")
+    logger.info(
+        f"Harvest complete. Downloaded {total_downloaded} new videos. "
+        f"Library: {video_count}/{Config.MAX_VIDEOS}"
+    )
 
 
 def main():
@@ -223,12 +231,17 @@ def main():
     logger.info("Starting Watts-A Content Harvester...")
     logger.info(f"Videos folder: {Config.VIDEOS_FOLDER}")
     logger.info(f"Max videos: {Config.MAX_VIDEOS}")
-    logger.info(f"Min duration: {Config.MIN_VIDEO_DURATION}s ({Config.MIN_VIDEO_DURATION // 60} minutes)")
+    min_dur = Config.MIN_VIDEO_DURATION
+    logger.info(f"Min duration: {min_dur}s ({min_dur // 60} minutes)")
     logger.info(f"Harvest interval: {Config.HARVESTER_INTERVAL_HOURS} hours")
 
     if not Config.SOURCE_CHANNELS:
-        logger.error("No SOURCE_CHANNELS configured! Add YouTube channel URLs to .env")
-        logger.error("Example: SOURCE_CHANNELS=https://www.youtube.com/@AlanWattsOrg")
+        logger.error(
+            "No SOURCE_CHANNELS configured! Add YouTube channel URLs to .env"
+        )
+        logger.error(
+            "Example: SOURCE_CHANNELS=https://www.youtube.com/@AlanWattsOrg"
+        )
         return
 
     logger.info(f"Configured channels: {len(Config.SOURCE_CHANNELS)}")
@@ -243,7 +256,8 @@ def main():
 
         # Sleep until next cycle
         sleep_seconds = Config.HARVESTER_INTERVAL_HOURS * 3600
-        logger.info(f"Sleeping for {Config.HARVESTER_INTERVAL_HOURS} hours until next harvest...")
+        hours = Config.HARVESTER_INTERVAL_HOURS
+        logger.info(f"Sleeping for {hours} hours until next harvest...")
         time.sleep(sleep_seconds)
 
 

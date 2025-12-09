@@ -1,7 +1,6 @@
 """Utility functions for Watts-A broadcast station."""
 
 import json
-import os
 import random
 import subprocess
 from pathlib import Path
@@ -74,7 +73,9 @@ def get_video_title(video_path: Path) -> str:
     return video_path.stem.replace("_", " ").replace("-", " ")
 
 
-def select_random_choices(videos: list[Path], count: int = 4, exclude: Path = None) -> list[Path]:
+def select_random_choices(
+    videos: list[Path], count: int = 4, exclude: Path = None
+) -> list[Path]:
     """
     Select random video choices for voting.
 

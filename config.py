@@ -28,7 +28,10 @@ class Config:
 
     # RTMP URLs
     TWITCH_RTMP_URL: str = f"rtmp://live.twitch.tv/app/{TWITCH_STREAM_KEY}"
-    KICK_RTMP_URL: str = f"rtmps://fa723fc1b171.global-contribute.live-video.net/app/{KICK_STREAM_KEY}"
+    KICK_RTMP_URL: str = (
+        f"rtmps://fa723fc1b171.global-contribute.live-video.net"
+        f"/app/{KICK_STREAM_KEY}"
+    )
     RUMBLE_RTMP_URL: str = f"rtmp://rtmp.rumble.com/live/{RUMBLE_STREAM_KEY}"
 
     # Paths
@@ -38,8 +41,10 @@ class Config:
     # Voting Settings
     VOTE_WINDOW_SECONDS: int = 60
     VOTE_OPTIONS_COUNT: int = 4
-    # Grace period after video ends to account for stream latency (5-10s typical)
-    VOTE_GRACE_PERIOD_SECONDS: int = int(os.getenv("VOTE_GRACE_PERIOD_SECONDS", "5"))
+    # Grace period after video ends to account for stream latency
+    VOTE_GRACE_PERIOD_SECONDS: int = int(
+        os.getenv("VOTE_GRACE_PERIOD_SECONDS", "5")
+    )
 
     # Content Harvester Settings
     SOURCE_CHANNELS: list[str] = [
@@ -48,8 +53,11 @@ class Config:
         if url.strip()
     ]
     MAX_VIDEOS: int = int(os.getenv("MAX_VIDEOS", "30"))
-    MIN_VIDEO_DURATION: int = int(os.getenv("MIN_VIDEO_DURATION", "900"))  # 15 minutes
-    HARVESTER_INTERVAL_HOURS: int = int(os.getenv("HARVESTER_INTERVAL_HOURS", "4"))
+    # 15 minutes minimum
+    MIN_VIDEO_DURATION: int = int(os.getenv("MIN_VIDEO_DURATION", "900"))
+    HARVESTER_INTERVAL_HOURS: int = int(
+        os.getenv("HARVESTER_INTERVAL_HOURS", "4")
+    )
 
     @classmethod
     def get_active_rtmp_urls(cls) -> list[str]:
@@ -67,10 +75,21 @@ class Config:
     def validate(cls) -> list[str]:
         """Validate configuration and return list of warnings."""
         warnings = []
-        if not cls.TWITCH_STREAM_KEY and not cls.KICK_STREAM_KEY and not cls.RUMBLE_STREAM_KEY:
-            warnings.append("No stream keys configured - streaming will be disabled")
+        no_keys = (
+            not cls.TWITCH_STREAM_KEY
+            and not cls.KICK_STREAM_KEY
+            and not cls.RUMBLE_STREAM_KEY
+        )
+        if no_keys:
+            warnings.append(
+                "No stream keys configured - streaming will be disabled"
+            )
         if not cls.TWITCH_ACCESS_TOKEN:
-            warnings.append("TWITCH_ACCESS_TOKEN not set - Twitch chat voting disabled")
+            warnings.append(
+                "TWITCH_ACCESS_TOKEN not set - Twitch chat voting disabled"
+            )
         if not cls.TWITCH_CHANNEL:
-            warnings.append("TWITCH_CHANNEL not set - Twitch chat voting disabled")
+            warnings.append(
+                "TWITCH_CHANNEL not set - Twitch chat voting disabled"
+            )
         return warnings

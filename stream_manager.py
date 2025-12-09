@@ -97,8 +97,8 @@ class StreamManager:
 
         if runtime > max_allowed:
             logger.warning(
-                f"Dead man's switch triggered! "
-                f"Runtime {runtime:.0f}s exceeds max allowed {max_allowed:.0f}s"
+                f"Dead man's switch triggered! Runtime {runtime:.0f}s "
+                f"exceeds max allowed {max_allowed:.0f}s"
             )
             return True
 
@@ -142,7 +142,10 @@ class StreamManager:
             try:
                 self._process.wait(timeout=2)
                 # If we get here, FFmpeg exited too quickly (error)
-                stderr = self._process.stderr.read().decode() if self._process.stderr else ""
+                if self._process.stderr:
+                    stderr = self._process.stderr.read().decode()
+                else:
+                    stderr = ""
                 logger.error(f"FFmpeg exited immediately: {stderr}")
                 self._process = None
                 self._start_time = None

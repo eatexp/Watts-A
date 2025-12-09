@@ -122,7 +122,11 @@ class BroadcastStation:
         time_elapsed = 0
 
         # Wait until voting time
-        while time_elapsed < vote_start_time and stream.is_streaming() and self._running:
+        while (
+            time_elapsed < vote_start_time
+            and stream.is_streaming()
+            and self._running
+        ):
             await asyncio.sleep(1)
             time_elapsed += 1
 
@@ -132,17 +136,20 @@ class BroadcastStation:
                 overlay.show_countdown(int(remaining))
 
         # === SAFE MODE VOTING ===
-        # Wrap voting logic in try/except so stream continues even if voting fails
+        # Wrap voting logic in try/except so stream continues
+        # even if voting fails
         try:
             # Start voting
             if stream.is_streaming() and self._running:
                 voting.start(options)
                 logger.info("Voting started")
 
-                # Collect votes for remaining time + grace period for stream latency
+                # Collect votes for remaining time + grace period
                 vote_end_time = duration + Config.VOTE_GRACE_PERIOD_SECONDS
-                total_vote_time = int(vote_end_time - time_elapsed)
-                logger.info(f"Voting window: {Config.VOTE_WINDOW_SECONDS}s + {Config.VOTE_GRACE_PERIOD_SECONDS}s grace period")
+                logger.info(
+                    f"Voting window: {Config.VOTE_WINDOW_SECONDS}s + "
+                    f"{Config.VOTE_GRACE_PERIOD_SECONDS}s grace period"
+                )
 
                 # Update overlay every 1 second for smooth countdown
                 while time_elapsed < vote_end_time and self._running:
@@ -160,7 +167,8 @@ class BroadcastStation:
                     await asyncio.sleep(1)
                     time_elapsed += 1
 
-                    # Check if stream is still running (dead man's switch may kill it)
+                    # Check if stream is still running
+                    # (dead man's switch may kill it)
                     if not stream.is_streaming():
                         logger.warning("Stream ended during voting")
                         break
@@ -177,7 +185,10 @@ class BroadcastStation:
                 await asyncio.sleep(5)  # Show winner for 5 seconds
             else:
                 # No votes - pick random
-                self._next_video = random.choice(vote_options) if vote_options else None
+                if vote_options:
+                    self._next_video = random.choice(vote_options)
+                else:
+                    self._next_video = None
                 logger.info("No votes received, selecting randomly")
 
         except Exception as e:
@@ -191,7 +202,10 @@ class BroadcastStation:
                 pass
 
             # Fallback to random selection
-            self._next_video = random.choice(vote_options) if vote_options else None
+            if vote_options:
+                self._next_video = random.choice(vote_options)
+            else:
+                self._next_video = None
             logger.info("Safe mode: Selected random video as fallback")
 
         # Stop current stream
@@ -201,7 +215,9 @@ class BroadcastStation:
         # Brief pause between videos
         await asyncio.sleep(2)
 
-    def _handle_vote(self, platform: str, username: str, choice: str, timestamp: float):
+    def _handle_vote(
+        self, platform: str, username: str, choice: str, timestamp: float
+    ):
         """Handle incoming vote from chat."""
         try:
             voting.record_vote(platform, username, choice, timestamp)
@@ -262,7 +278,9 @@ async def main():
     videos = scan_videos()
     if not videos:
         logger.warning(f"No videos found in {Config.VIDEOS_FOLDER}")
-        logger.warning("Add .mp4 files to the videos folder to start streaming")
+        logger.warning(
+            "Add .mp4 files to the videos folder to start streaming"
+        )
 
     # Run the station
     await station.run()

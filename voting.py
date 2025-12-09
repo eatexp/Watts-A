@@ -51,7 +51,8 @@ class VotingSession:
 
         Args:
             options: List of (letter, video_path) tuples.
-                     e.g., [("A", Path("video1.mp4")), ("B", Path("video2.mp4"))]
+                     e.g., [("A", Path("video1.mp4")),
+                     ("B", Path("video2.mp4"))]
         """
         self._options.clear()
         self._votes.clear()
@@ -70,9 +71,14 @@ class VotingSession:
         self._is_active = False
         results = self.get_results()
         tally = ", ".join(f"{k}:{v}" for k, v in sorted(results.items()))
-        logger.info(f"Voting stopped. Final tally: {tally}. Total voters: {self.total_votes}")
+        logger.info(
+            f"Voting stopped. Final tally: {tally}. "
+            f"Total voters: {self.total_votes}"
+        )
 
-    def record_vote(self, platform: str, username: str, choice: str, timestamp: float):
+    def record_vote(
+        self, platform: str, username: str, choice: str, timestamp: float
+    ):
         """
         Record a vote from a user.
 
@@ -91,7 +97,8 @@ class VotingSession:
             logger.debug(f"Invalid vote choice: {choice}")
             return
 
-        # Create unique user key (platform:username to allow same user on different platforms)
+        # Create unique user key
+        # (platform:username to allow same user on different platforms)
         user_key = f"{platform}:{username.lower()}"
 
         # Check if user already voted
@@ -99,12 +106,18 @@ class VotingSession:
             old_vote = self._votes[user_key]
             if old_vote.choice == choice:
                 # Same vote - ignore to prevent spam
-                logger.debug(f"Duplicate vote ignored: {username} already voted {choice}")
+                logger.debug(
+                    f"Duplicate vote ignored: {username} already voted "
+                    f"{choice}"
+                )
                 return
             # Different vote - decrement old choice
             old_option = self._options[old_vote.choice]
             old_option.vote_count -= 1
-            logger.info(f"[Vote] {username} ({platform}) changed vote: {old_vote.choice} -> {choice}")
+            logger.info(
+                f"[Vote] {username} ({platform}) changed vote: "
+                f"{old_vote.choice} -> {choice}"
+            )
         else:
             logger.info(f"[Vote] {username} ({platform}) voted: {choice}")
 
@@ -127,7 +140,9 @@ class VotingSession:
             option.count_timestamps[option.vote_count] = timestamp
 
         # Log current tally
-        tally = ", ".join(f"{k}:{v.vote_count}" for k, v in sorted(self._options.items()))
+        tally = ", ".join(
+            f"{k}:{v.vote_count}" for k, v in sorted(self._options.items())
+        )
         logger.info(f"[Tally] {tally}")
 
     def get_results(self) -> dict[str, int]:
