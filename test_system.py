@@ -3,6 +3,8 @@
 System test script - validates video detection and basic functionality
 """
 import os
+import subprocess
+import time
 from pathlib import Path
 from config import Config
 from voting import VotingSession
@@ -32,7 +34,6 @@ def test_video_detection():
 def test_voting_system():
     """Test voting mechanics"""
     print("\n=== VOTING SYSTEM TEST ===")
-    import time
 
     session = VotingSession()
 
@@ -82,7 +83,8 @@ def test_config():
     all_ok = True
     for name, value in required_vars:
         if value and value != "xxxxx" and value != "your_":
-            print(f"  ✅ {name}: {value[:20]}..." if len(value) > 20 else f"  ✅ {name}: {value}")
+            display_value = f"{value[:20]}..." if len(value) > 20 else value
+            print(f"  ✅ {name}: {display_value}")
         else:
             print(f"  ❌ {name}: NOT SET")
             all_ok = False
@@ -105,9 +107,13 @@ def test_ffmpeg():
     if result == 0:
         print("✅ FFmpeg is available")
         # Get version
-        import subprocess
-        version = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
-        print(f"  {version.stdout.split(chr(10))[0]}")
+        version = subprocess.run(
+            ["ffmpeg", "-version"],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        print(f"  {version.stdout.splitlines()[0]}")
         return True
     else:
         print("❌ FFmpeg not found")
