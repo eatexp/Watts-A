@@ -121,7 +121,13 @@ class StreamManager:
         try:
             cmd = self._build_ffmpeg_command(video_path)
             logger.info(f"Starting stream: {video_path.name}")
-            logger.debug(f"FFmpeg command: {' '.join(cmd)}")
+
+            # Log command with sanitized stream keys (security)
+            safe_cmd = ' '.join(cmd)
+            for key in [Config.TWITCH_STREAM_KEY, Config.KICK_STREAM_KEY, Config.RUMBLE_STREAM_KEY]:
+                if key and key != "xxxxx":
+                    safe_cmd = safe_cmd.replace(key, "***REDACTED***")
+            logger.debug(f"FFmpeg command: {safe_cmd}")
 
             self._process = subprocess.Popen(
                 cmd,
